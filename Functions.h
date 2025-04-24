@@ -102,4 +102,11 @@ typedef struct {
 
 void phonesSort(int namesIndexArr[], int phonesIndexArr[], Record arr[], int n);
 
+void BuildHeap(int sequence[], const int size, int& M, int& C);
+void HeapSort(int sequence[], int n, int& M, int& C);
+
+void quicksort2(int mass[], int L, int R, int& m, int& c, int depth, int& maxDepth);
+void quicksort(int arr[], int L, int R, int& M, int& C, int depth, int& maxDepth);
+void MakeDataQuick(std::string sortName, int massive[], int m, int c, void (*func)(int mass[], int L, int R, int& m, int& c, int depth, int& maxDepth));
+
 #endif

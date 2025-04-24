@@ -4,6 +4,7 @@
 #include <vector>
 #include "Functions.h"
 #include <iomanip>
+#include <windows.h>
 
 int A[10];
 int A2[10];
@@ -59,13 +60,184 @@ int bsmass[10];
 int bs1data[10];
 int bs2data[10];
 
+int heapA[10];
+
+int heap1[100]; int heap1data[3];
+int heap2[200]; int heap2data[3];
+int heap3[300]; int heap3data[3];
+int heap4[400]; int heap4data[3];
+int heap5[500]; int heap5data[3];
+
+int qA[10];
+
+int q1[100]; int q1data[3];
+int q2[200]; int q2data[3];
+int q3[300]; int q3data[3];
+int q4[400]; int q4data[3];
+int q5[500]; int q5data[3];
+
+int q21[100]; int q21data[3];
+int q22[200]; int q22data[3];
+int q23[300]; int q23data[3];
+int q24[400]; int q24data[3];
+int q25[500]; int q25data[3];
+
 void copy(int A[], int B[], int n) {
     for (int i = 0; i < n; i++) {
         B[i] = A[i];
     }
 }
 
+int swaps = 0;
+int comparisons = 0;
+
+void piram(int arr[], int L, int R) {
+    int x = arr[L];
+    int i = L;
+    while (1) {
+        int j = 2 * i;
+        if (j > R)
+            break;
+        if (j < R) {
+            if (arr[j + 1] > arr[j]) {
+                comparisons++;
+                j = j + 1;
+            }
+        }
+        if (x >= arr[j]) {
+            comparisons++;
+            break;
+        }
+        swaps++;
+        arr[i] = arr[j];
+        i = j;
+    }
+    if (i != L) {
+        swaps++;
+    }
+    swaps++;
+    arr[i] = x;
+}
+
+void buildHeap(int arr[], int n) {
+    for (int start = n/2 - 1; start >= 0; start--) {
+        piram(arr, start, n - 1);
+    }
+}
+
+void generateArray(int arr[], int n, int type) {
+    switch(type) {
+        case 0:
+            for (int i = 0; i < n; i++) arr[i] = n - i;
+            break;
+        case 1:
+            for (int i = 0; i < n; i++) arr[i] = rand() % (2*n);
+            break;
+        case 2:
+            for (int i = 0; i < n; i++) arr[i] = i + 1;
+            break;
+    }
+}
+
+void testHeapConstruction(int n) {
+    int arr[n];
+    int theoretical = 2 * static_cast<int>(log2(n)) + static_cast<int>(log2(n))+2;
+
+    printf("| %4d ", n);
+
+    for (int type = 0; type < 3; type++) {
+        generateArray(arr, n, type);
+
+        comparisons = 0;
+        swaps = 0;
+        piram(arr,1, n);
+
+        printf("| %7d ", comparisons + swaps);
+    }
+    printf("| %7d |\n", theoretical);
+}
+
+void siftDown(int arr[], int start, int end) {
+    int root = start;
+
+    while (2 * root + 1 <= end) {
+        int child = 2 * root + 1;
+        int swapIdx = root;
+
+        comparisons++;
+        if (arr[swapIdx] < arr[child]) {
+            swapIdx = child;
+        }
+
+        if (child + 1 <= end) {
+            comparisons++;
+            if (arr[swapIdx] < arr[child + 1]) {
+                swapIdx = child + 1;
+            }
+        }
+
+        if (swapIdx == root) {
+            return;
+        } else {
+            swaps++;
+            int temp = arr[root];
+            arr[root] = arr[swapIdx];
+            arr[swapIdx] = temp;
+            root = swapIdx;
+        }
+    }
+}
+
+int createHeap(int* arr, int elem, int i, int n) {
+    int M = 0, C = 0;
+    M++;
+    int temp = elem;
+    while (true) {
+        int j = 2 * i + 1;
+        if (j >= n) break;
+        C++;
+        if (j + 1 < n && arr[j + 1] <= arr[j]) j++;
+        C++;
+        if (temp <= arr[j]) break;
+        M++;
+        arr[i] = arr[j];
+        i = j;
+    }
+    M++;
+    arr[i] = temp;
+    return M + C;
+}
+
+
+int heapSort(int* arr, int size) {
+    int M_PLUS_C = 0;
+    for (int i = (size - 2) / 2; i >= 0; i--) {
+        M_PLUS_C += createHeap(arr, arr[i], i, size);
+    }
+    int heapSize = size;
+    while (heapSize > 1) {
+        M_PLUS_C += 3;
+        std::swap(arr[0], arr[heapSize - 1]);
+        heapSize--;
+        M_PLUS_C += createHeap(arr, arr[0], 0, heapSize);
+    }
+    return M_PLUS_C;
+}
+
+void testHeapSort(int n) {
+    int arr[n];
+
+    printf("| %4d ", n);
+
+    for (int type = 0; type < 3; type++) {
+        generateArray(arr, n, type);
+        heapSort(arr, n);
+        printf("| %8d ", comparisons + swaps);
+    }
+    printf("|\n");
+}
 int main() {
+    SetConsoleOutputCP(CP_UTF8);
     srand(time(nullptr));
 
     //A 10
@@ -767,7 +939,7 @@ int main() {
 
     for (int i : pindexMassive) {
         std::cout << "ID: " << records[i].id << ", Name: " << records[i].name
-                  << ", Phone: " << records[i].lastname << ", Born Day: " << records[i].phone << "\n";
+                  << ", Lastname: " << records[i].lastname << ", Phone: " << records[i].phone << "\n";
     }
 
     std::cout << std::endl;
@@ -776,7 +948,7 @@ int main() {
     std::cout << std::endl;
     for (int i : pindexMassive) {
         std::cout << "ID: " << records[i].id << ", Name: " << records[i].name
-                  << ", Phone: " << records[i].lastname << ", Born Day: " << records[i].phone << "\n";
+                  << ", Lastname: " << records[i].lastname << ", Phone: " << records[i].phone << "\n";
     }
 
     std::cout << std::endl;
@@ -784,8 +956,147 @@ int main() {
     std::cout << std::endl;
     for (int i : nindexMassive) {
         std::cout << "ID: " << records[i].id << ", Name: " << records[i].name
-                  << ", Phone: " << records[i].lastname << ", Born Day: " << records[i].phone << "\n";
+                  << ", Lastname: " << records[i].lastname << ", Phone: " << records[i].phone << "\n";
     }
+
+
+    printf("Heap Make M+C\n");
+    printf("+------+-----------+-----------+-----------+----------+\n");
+    printf("|  N   |   Ubiv    |    Rand   |   Vozr    |   Teor   |\n");
+    printf("+------+-----------+-----------+-----------+----------+\n");
+
+    int sizes[] = {100, 200, 300, 400, 500};
+    for (int size : sizes) {
+        testHeapConstruction(size);
+    }
+
+    printf("+------+-----------+-----------+-----------+----------+\n");
+
+    printf("\nHeapSort M+C\n");
+    printf("+------+-----------+-----------+-----------+\n");
+    printf("|  N   |  Ubiv     |  Vozr     |  Rand     |\n");
+    printf("+------+-----------+-----------+-----------+\n");
+
+    for (int i = 100; i <= 500; i += 100) {
+        int hs[i];
+
+        std::cout << "|" << std::setw(6) << i;
+        FillDec(hs, i);
+        std::cout << "|" << std::setw(11) << heapSort(hs, i);
+        FillRand(hs, i);
+        std::cout << "|" << std::setw(11) << heapSort(hs, i);
+        FillInc(hs, i);
+        std::cout << "|" << std::setw(11) << heapSort(hs, i);
+        std::cout << std::endl;
+    }
+
+    printf("+------+-----------+-----------+-----------+\n");
+
+    int heap[] = {1,2,3, 56, 45, 6, 54, 89};
+    for (int i:heap) std::cout << i << " ";
+    std::cout << std::endl;
+    BuildHeap(heap, 8, m, c);
+    for (int i:heap) std::cout << i << " ";
+    std::cout << std::endl;
+
+    MakeDataQuick("QuickSort", qA, m, c, quicksort);
+    std::cout << std::endl;
+    MakeDataQuick("Quick2", qA, m, c, quicksort2);
+    int maxDepth = 0;
+
+    int q1[500], q2[500]; // Массивы для сортировки
+
+    std::cout << "Трудоемкость метода Хоара (Мф+Сф):\n";
+    std::cout << "-------------------------------------\n";
+    std::cout << std::setw(5) << "N" << std::setw(12) << "Убыв." << std::setw(12) << "Возр." << std::setw(12) << "Случ." << std::endl;
+    std::cout << "-------------------------------------\n";
+
+    for (int n = 100; n <= 500; n += 100) {
+        // Заполняем массивы разными типами данных
+        FillDec(q1, n);
+        FillInc(q2, n);
+
+        int* q3 = new int[n];
+        FillRand(q3, n);
+
+        // Сортируем и собираем статистику для quicksort1
+        m = 0; c = 0; maxDepth = 0;
+        quicksort(q1, 0, n - 1, m, c,0, maxDepth); // Используем quicksort1
+        int dec_count = m + c;
+
+        m = 0; c = 0; maxDepth = 0;
+        quicksort(q2, 0, n - 1, m, c,0, maxDepth); // Используем quicksort1
+        int inc_count = m + c;
+
+        m = 0; c = 0; maxDepth = 0;
+        quicksort(q3, 0, n - 1, m, c,0, maxDepth); // Используем quicksort1
+        int rand_count = m + c;
+
+        std::cout << std::setw(5) << n << std::setw(12) << dec_count
+                  << std::setw(12) << inc_count << std::setw(12) << rand_count << std::endl;
+
+        delete[] q3; // Освобождаем выделенную память
+    }
+
+
+
+    // Таблица трудоемкости (Mф + Сф)
+    std::cout << "Трудоемкость метода Хоара (QuickSort2, Мф+Сф):\n";
+    std::cout << "-------------------------------------\n";
+    std::cout << std::setw(5) << "N" << std::setw(12) << "Убыв." << std::setw(12) << "Возр." << std::setw(12) << "Случ." << std::endl;
+    std::cout << "-------------------------------------\n";
+
+    for (int n = 100; n <= 500; n += 100) {
+        m = 0, c = 0, maxDepth = 0;
+        FillDec(q1, n);
+        quicksort2(q1, 0, n - 1, m, c,0, maxDepth);
+        int dec_count = m + c;
+
+        m = 0; c = 0; maxDepth = 0;
+        FillInc(q1, n);
+        quicksort2(q1, 0, n - 1, m, c,0, maxDepth);
+        int inc_count = m + c;
+
+        m = 0; c = 0; maxDepth = 0;
+        FillRand(q1, n);
+        quicksort2(q1, 0, n - 1, m, c,0, maxDepth);
+        int rand_count = m + c;
+
+        std::cout << std::setw(5) << n << std::setw(12) << dec_count
+                  << std::setw(12) << inc_count << std::setw(12) << rand_count << std::endl;
+    }
+
+    std::cout << "Глубина рекурсии" << std::endl;
+
+    std::cout << "+-----+--------+--------+--------+--------+--------+--------+" << std::endl;
+    std::cout << "|" << std::setw(5) << "N" << "|" << std::setw(8) <<  "Убыв." << "|" << std::setw(8) << "Возр." << "|" << std::setw(8) << "Случ." << "|" << std::setw(8) <<  "Убыв." << "|" << std::setw(8) << "Возр." << "|" << std::setw(8) << "Случ." << "|" << std::endl;
+    std::cout << "+-----+--------+--------+--------+--------+--------+--------+" << std::endl;
+    for (int i = 100; i <= 500; i += 100) {
+
+        int mass[i];
+        int maxD1 = 0, maxD2 = 0, maxD3 = 0, maxD4 = 0, maxD5 = 0, maxD6 = 0;
+        FillDec(mass, i);
+        quicksort(mass, 0, i - 1, m, c,0, maxD1);
+
+        FillRand(mass, i);
+        quicksort(mass, 0, i - 1, m, c,0, maxD2);
+
+        FillInc(mass, i);
+        quicksort(mass, 0, i - 1, m, c,0, maxD3);
+
+        FillDec(mass, i);
+        quicksort2(mass, 0, i - 1, m, c,0, maxD4);
+
+        FillRand(mass, i);
+        quicksort2(mass, 0, i - 1, m, c,0, maxD5);
+
+        FillInc(mass, i);
+        quicksort2(mass, 0, i - 1, m, c,0, maxD6);
+
+        std::cout << "|" << std::setw(5) << i << "|" << std::setw(8) <<  maxD1 << "|" << std::setw(8) << maxD2 << "|" << std::setw(8) << maxD3 << "|" << std::setw(8) <<  maxD4 << "|" << std::setw(8) << maxD5 << "|" << std::setw(8) << maxD6 << "|" << std::endl;
+
+    }
+
 
     return 0;
 }

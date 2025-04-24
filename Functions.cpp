@@ -321,13 +321,11 @@ bool less(const abonent& x, const abonent& y, SortKey key, SortDirection dir) {
     return false;
 }
 
-// Функция сортировки вставками
 void insertSort(abonent arr[], int n, SortKey key, SortDirection dir) {
     for (int i = 1; i < n; ++i) {
         abonent temp = arr[i];
         int j = i - 1;
 
-        // Compare and shift elements based on the sorting criteria
         while (j >= 0 && less(temp, arr[j], key, dir)) {
             arr[j + 1] = arr[j];
             j--;
@@ -336,7 +334,7 @@ void insertSort(abonent arr[], int n, SortKey key, SortDirection dir) {
     }
 }
 
-// Функция вывода справочника
+
 void printUsers(const abonent arr[], int n) {
     for (int i = 0; i < n; i++) {
         std::cout << "ID: " << arr[i].id << ", Name: " << arr[i].name
@@ -365,3 +363,320 @@ void phonesSort(int namesIndexArr[], int phonesIndexArr[], Record arr[], int n) 
         phonesIndexArr[j + 1] = t;
     }
 }
+
+void MakeHeap(int sequence[], const int L, const int R, int& M, int& C) {
+    // int x = sequence[L];
+    // int i = L;
+    //
+    // while (true) {
+    //     int j = 2 * i + 1; // Левый дочерний узел
+    //     C++; // Счётчик сравнений
+    //
+    //     if (j > R) break; // Если нет дочерних узлов, выходим
+    //
+    //     C += 2; // Счётчик сравнений
+    //     // Проверяем, есть ли правый дочерний узел и сравниваем
+    //     if (j + 1 <= R && sequence[j + 1] > sequence[j]) {
+    //         j++; // Переходим к правому дочернему узлу
+    //     }
+    //
+    //     C++; // Счётчик сравнений
+    //     if (x >= sequence[j]) break; // Если текущий узел больше или равен, выходим
+    //
+    //     sequence[i] = sequence[j]; // Перемещаем дочерний узел вверх
+    //     M++; // Счётчик присваиваний
+    //     i = j; // Переходим к следующему узлу
+    // }
+    // sequence[i] = x; // Вставляем элемент на его место
+    // M++; // Счётчик присваиваний
+
+
+    // M=0,C=0;
+    // int X = sequence[L], i = L, j;
+    // M++;
+    // while (true)
+    // {
+    //     j = 2*i;
+    //     if (j > R)
+    //         break;
+    //     C++;
+    //     if ((j < R) && (sequence[j + 1] <= sequence[j]))
+    //         j++;
+    //     C++;
+    //     if (X <= sequence[j])
+    //         break;
+    //     sequence[i] = sequence[j];
+    //     M++;
+    //     i = j;
+    // }
+    // sequence[i] = X;
+    // M++;
+
+    int x = sequence[L];
+    int i = L;
+    while (true) {
+        int j = 2 * i;
+        if (j > R)
+            break;
+        if (j < R) {
+            if (sequence[j + 1] > sequence[j]) {
+                C++;
+                j = j + 1;
+            }
+        }
+        if (x >= sequence[j]) {
+            C++;
+            break;
+        }
+        M++;
+        sequence[i] = sequence[j];
+        i = j;
+    }
+    if (i != L) {
+        M++;
+    }
+    M++;
+    sequence[i] = x;
+}
+
+
+void HeapSort(int sequence[], const int n, int& M, int& C) {
+    M = 0;
+    C = 0;
+    int L = n / 2 - 1;
+
+    while (L >= 0) {
+        MakeHeap(sequence, L, n - 1, M, C);
+        L--;
+    }
+
+    int R = n - 1;
+
+    while (R > 0) {
+        std::swap(sequence[0], sequence[R]);
+        R--;
+        MakeHeap(sequence, 0, R, M, C);
+    }
+
+
+    // int L = n/2, t; //шаг 1
+    // while (L > 0){
+    //     MakeHeap(sequence, L, n, M, C);
+    //     L--;
+    // }
+    // int R=n; //шаг 2
+    // while (R>1){
+    //     t = sequence[1];
+    //     sequence[1] = sequence[R];
+    //     sequence[R] = t;
+    //     M += 3;
+    //     R--;
+    //     MakeHeap(sequence, 1, R, M, C);
+    // }
+}
+
+void BuildHeap(int sequence[], const int size, int& M, int& C) {
+    M = 0; C = 0;
+    for (int i = size / 2 - 1; i >= 0; i--) {
+        MakeHeap(sequence, i, size - 1, M, C);
+    }
+}
+
+// void quicksort(int arr[], int L, int R, int& m, int& c) {
+//     if (L < R) {
+//         int x = arr[L];  // Опорный элемент
+//         int i = L;
+//         int j = R;
+//
+//         while (i <= j) {
+//             while (arr[i] < x) i++;
+//             while (arr[j] > x) j--;
+//
+//             if (i <= j) {
+//                 std::swap(arr[i], arr[j]);
+//                 i++;
+//                 j--;
+//             }
+//         }
+//
+//         if (L < j)
+//             quicksort(arr, L, j, m, c);
+//         if (j+1 < R)
+//             quicksort(arr, j+1, R, m, c);
+//     }
+// }
+
+void quicksort(int arr[], int L, int R, int& M, int& C, int depth, int& maxDepth) {
+
+    int i, j;
+    int x; // Опорный элемент
+
+    i = L;
+    j = R;
+
+    x = arr[L]; // Выбор опорного элемента как первого элемента
+
+    // Обновляем максимальную глубину рекурсии
+    if (depth > maxDepth) {
+        maxDepth = depth;
+    }
+
+    while (i <= j) {
+        while (arr[i] < x) {
+            i++;
+            C++;
+        }
+
+        while (arr[j] > x) {
+            j--;
+            C++;
+        }
+
+        C++;
+        if (i <= j) {
+            std::swap(arr[i], arr[j]);
+            M++;
+            i++;
+            j--;
+        }
+    }
+
+    if (L < j)
+        quicksort(arr, L, j, M, C, depth + 1, maxDepth);
+    if (i < R)
+        quicksort(arr, i, R, M, C, depth + 1, maxDepth);
+}
+
+// void quicksort2(int arr[], int L, int R, int& M, int& C, int depth, int& maxDepth) {
+//     int i, j; int x; // Опорный элемент
+//
+//     i = L;
+//     j = R;
+//     x = arr[(L + R) / 2]; // Выбор опорного элемента как среднего элемента
+//
+//     // Обновляем максимальную глубину рекурсии
+//     if (depth > maxDepth) {
+//         maxDepth = depth;
+//     }
+//
+//     while (i <= j) {
+//         while (arr[i] < x) {
+//             i++;
+//             C++;
+//         }
+//         C++;
+//
+//         while (arr[j] > x) {
+//             j--;
+//             C++;
+//         }
+//         C++;
+//
+//         if (i <= j) {
+//             std::swap(arr[i], arr[j]);
+//             M++;
+//             i++;
+//             j--;
+//         }
+//     }
+//
+//     if (L < j)
+//         quicksort2(arr, L, j, M, C, depth + 1, maxDepth);
+//     if (i < R)
+//         quicksort2(arr, i, R, M, C, depth + 1, maxDepth);
+// }
+
+void quicksort2(int arr[], int L, int R, int& M, int& C, int depth, int& maxDepth) {
+    int i, j;
+    int x; // Опорный элемент
+    if (depth > maxDepth) {
+        maxDepth = depth;
+    }
+
+    do {
+        // Выбор опорного элемента как среднего элемента
+        x = arr[(L + R) / 2];
+        i = L;
+        j = R;
+
+        while (i <= j) {
+            while (arr[i] < x) {
+                i++;
+                C++;
+            }
+            C++;
+
+            while (arr[j] > x) {
+                j--;
+                C++;
+            }
+            C++;
+
+            if (i <= j) {
+                std::swap(arr[i], arr[j]);
+                M++;
+                i++;
+                j--;
+            }
+        }
+
+        // Проверяем, какая часть длиннее
+        if (j - L > R - i) {
+            // Сортируем правую часть
+            if (i < R) {
+                quicksort2(arr, i, R, M, C, depth + 1, maxDepth);
+            }
+            R = j; // Обновляем R
+        } else {
+            // Сортируем левую часть
+            if (L < j) {
+                quicksort2(arr, L, j, M, C, depth + 1, maxDepth);
+            }
+            L = i; // Обновляем L
+        }
+
+        // Обновляем максимальную глубину рекурсии
+        maxDepth++;
+    } while (L < R);
+}
+
+
+void MakeDataQuick(std::string sortName, int massive[], int m, int c, void (*func)(int mass[], int L, int R, int& m, int& c, int depth, int& maxDepth)) {
+    m = 0, c = 0; int maxDepth = 0;
+    std::cout << sortName << std::endl;
+    FillRand(massive, 10);
+    PrintMas(massive, 10);
+    std::cout << "Series: " << RunNumber(massive, 10) << ", CheckSum: " << CheckSum(massive, 10) << std::endl;
+    std::cout << std::endl;
+    func(massive, 0, 9, m, c, 1, maxDepth);
+    std::cout << "Sorted: ";
+    PrintMas(massive, 10);
+    std::cout << "Series: " << RunNumber(massive, 10) << ", CheckSum: " << CheckSum(massive, 10) << std::endl;
+    std::cout << "Mf = " << m << " Cf = " << c << std::endl;
+    std::cout << std::endl;
+
+    m = 0, c = 0;
+    FillInc(massive, 10);
+    PrintMas(massive, 10);
+    std::cout << "Series: " << RunNumber(massive, 10) << ", CheckSum: " << CheckSum(massive, 10) << std::endl;
+    std::cout << std::endl;
+    func(massive, 0, 9, m, c, 1, maxDepth);
+    std::cout << "Sorted: ";
+    PrintMas(massive, 10);
+    std::cout << "Series: " << RunNumber(massive, 10) << ", CheckSum: " << CheckSum(massive, 10) << std::endl;
+    std::cout << "Mf = " << m << " Cf = " << c << std::endl;
+    std::cout << std::endl;
+
+    m = 0, c = 0;
+    FillDec(massive, 10);
+    PrintMas(massive, 10);
+    std::cout << "Series: " << RunNumber(massive, 10) << ", CheckSum: " << CheckSum(massive, 10) << std::endl;
+    std::cout << std::endl;
+    func(massive, 0, 9, m, c, 1, maxDepth);
+    std::cout << "Sorted: ";
+    PrintMas(massive, 10);
+    std::cout << "Series: " << RunNumber(massive, 10) << ", CheckSum: " << CheckSum(massive, 10) << std::endl;
+    std::cout << "Mf = " << m << " Cf = " << c << std::endl;
+    std::cout << std::endl;
+}
+
